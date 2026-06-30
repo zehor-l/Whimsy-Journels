@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>✦ Whimsy Journals ✦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Nunito:wght@300;400;600&family=Satisfy&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBAiA-XsZjatWcrGJ2MZNJzLmsnFW8AD_g",
+    authDomain: "whimsyjournels.firebaseapp.com",
+    projectId: "whimsyjournels",
+    storageBucket: "whimsyjournels.firebasestorage.app",
+    messagingSenderId: "808043276261",
+    appId: "1:808043276261:web:489f7adf3055c75ec9310c",
+    measurementId: "G-54WJQ7RTKZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // Expose simple functions on window so the plain (non-module) React script below can use them
+  window.fbSignIn = () => signInWithPopup(auth, provider).then(result => {
+    const u = result.user;
+    return { name: u.displayName, email: u.email, picture: u.photoURL };
+  });
+  window.fbSignOut = () => signOut(auth);
+  window.fbOnAuthChanged = (callback) => onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      callback({ name: firebaseUser.displayName, email: firebaseUser.email, picture: firebaseUser.photoURL });
+    } else {
+      callback(null);
+    }
+  });
+  window.fbReady = true;
+  window.dispatchEvent(new Event("firebase-ready"));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:#f5ede0;}
+#root{min-height:100vh;}
+
+:root{
+  --cream:#f5ede0;--parchment:#ede0c8;--blush:#d4a8a0;--rose:#b87060;
+  --dusty-rose:#c49080;--sage:#7a9c78;--dark-sage:#4a6c48;
+  --forest:#2c4830;--gold:#c8a050;--antique-gold:#a07838;
+  --lavender:#9880b0;--mauve:#8a6070;--ink:#2a1a10;
+  --soft:#6a5040;--warm-white:#faf4ec;--card:#fff8ef;
+  --dark-brown:#3a1e0a;--velvet:#1e0e20;
+}
+
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-20px) rotate(5deg)}}
+@keyframes floatB{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(-4deg)}}
+@keyframes floatC{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-18px) translateX(6px)}66%{transform:translateY(-8px) translateX(-5px)}}
+@keyframes drift{0%{transform:translateX(-80px) translateY(0) rotate(0)}100%{transform:translateX(calc(100vw+100px)) translateY(-50px) rotate(20deg)}}
+@keyframes twinkle{0%,100%{opacity:0.2;transform:scale(0.7)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes sparkle{0%{opacity:0;transform:scale(0) rotate(0)}30%{opacity:1;transform:scale(1.2) rotate(180deg)}60%{opacity:0.6;transform:scale(0.8) rotate(270deg)}100%{opacity:0;transform:scale(0) rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes shimmer{0%,100%{opacity:0.1}50%{opacity:0.35}}
+@keyframes toastIn{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes frameGlow{0%,100%{box-shadow:0 0 20px rgba(200,160,80,0.2),inset 0 0 20px rgba(200,160,80,0.05)}50%{box-shadow:0 0 40px rgba(200,160,80,0.4),inset 0 0 30px rgba(200,160,80,0.1)}}
+@keyframes stampIn{from{transform:rotate(12deg) scale(0);opacity:0}to{transform:rotate(12deg) scale(1);opacity:1}}
+@keyframes cloudDrift{0%,100%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;gap:4px;
+  padding:10px 20px;flex-wrap:wrap;
+  background:rgba(245,237,224,0.92);
+  backdrop-filter:blur(18px) saturate(1.3);
+  border-bottom:2px solid rgba(200,160,80,0.4);
+  box-shadow:0 2px 20px rgba(100,60,20,0.12);
+  border-radius:0 0 22px 22px;
+}
+.nav-title{
+  font-family:'Satisfy',cursive;font-size:18px;color:var(--rose);
+  margin-right:12px;flex-shrink:0;
+  text-shadow:1px 1px 0 rgba(255,255,255,0.8);
+  letter-spacing:1px;
+}
+.nav-btn{
+  border:none;background:transparent;cursor:pointer;
+  font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;
+  color:var(--soft);padding:6px 16px;border-radius:999px;transition:all 0.2s;
+  border:1px solid transparent;letter-spacing:0.5px;
+}
+.nav-btn:hover{background:rgba(200,160,80,0.12);color:var(--ink);border-color:rgba(200,160,80,0.3);}
+.nav-btn.active{
+  background:linear-gradient(135deg,rgba(212,168,160,0.3),rgba(200,160,80,0.2));
+  color:var(--dark-brown);font-weight:600;
+  border:1px solid rgba(200,160,80,0.45);
+  box-shadow:inset 0 1px 3px rgba(200,160,80,0.1);
+}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:60px 24px 44px;position:relative;z-index:10;}
+.hero-title{
+  font-family:'Satisfy',cursive;
+  font-size:clamp(48px,9vw,90px);
+  color:var(--dark-brown);
+  line-height:1.05;margin-bottom:10px;
+  position:relative;display:inline-block;
+  text-shadow:2px 3px 0 rgba(255,255,255,0.6),0 6px 20px rgba(100,60,20,0.15);
+}
+.hero-title-wrap{position:relative;display:inline-block;}
+.hero-divider{
+  width:200px;height:1px;margin:14px auto 16px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--antique-gold),var(--gold),transparent);
+  position:relative;
+}
+.hero-divider::before,.hero-divider::after{
+  content:'❧';position:absolute;top:-9px;color:var(--antique-gold);font-size:12px;opacity:0.7;
+}
+.hero-divider::before{left:-8px;}
+.hero-divider::after{right:-8px;}
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;
+  color:var(--soft);letter-spacing:3px;
+}
+
+/* ── SECTION ── */
+.section{max-width:1020px;margin:0 auto;padding:32px 20px 70px;position:relative;z-index:10;}
+.section-title{
+  font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;
+  color:var(--dark-brown);margin-bottom:28px;display:flex;align-items:center;gap:12px;
+  letter-spacing:1px;border-bottom:1px solid rgba(200,160,80,0.3);padding-bottom:12px;
+}
+.section-title::before{content:'❧';color:var(--antique-gold);font-size:20px;}
+.dark-page{color:#f0e8d8;}
+.dark-page .section-title{color:#d8a8e8;border-bottom-color:rgba(180,120,210,0.3);}
+.dark-page .section-title::before{color:#c888d8;}
+
+/* ── CARD ── */
+.card{
+  background:rgba(255,248,239,0.94);
+  border:1px solid rgba(200,160,80,0.2);
+  border-radius:20px;
+  box-shadow:0 4px 20px rgba(100,60,20,0.1),0 1px 3px rgba(0,0,0,0.05);
+  padding:20px;position:relative;overflow:hidden;
+  transition:transform 0.25s,box-shadow 0.25s;
+  backdrop-filter:blur(4px);
+}
+.card-photo{width:calc(100% + 40px);margin:-20px -20px 14px;height:140px;object-fit:cover;display:block;border-radius:20px 20px 0 0;}
+.card:hover{transform:translateY(-4px) rotate(0.3deg);box-shadow:0 12px 36px rgba(100,60,20,0.18);}
+
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:24px;}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+
+/* ── FORM ── */
+.input{
+  width:100%;border:1px solid rgba(180,130,80,0.35);
+  border-radius:3px;padding:10px 14px;
+  font-family:'Nunito',sans-serif;font-size:14px;
+  color:var(--ink);background:rgba(255,250,240,0.9);
+  outline:none;transition:border-color 0.2s,background 0.2s;
+}
+.input:focus{border-color:var(--antique-gold);background:#fff;box-shadow:0 0 0 3px rgba(200,160,80,0.12);}
+.textarea{resize:vertical;min-height:80px;}
+.btn{border:none;cursor:pointer;border-radius:3px;font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;padding:9px 22px;transition:all 0.2s;letter-spacing:0.5px;}
+.btn-primary{background:linear-gradient(135deg,#b87060,#c8a050);color:#fff8ef;box-shadow:0 2px 10px rgba(120,60,30,0.25);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(120,60,30,0.38);}
+.btn-sm{font-size:13px;padding:6px 15px;}
+.btn-ghost{background:transparent;border:1px solid rgba(180,130,80,0.4);color:var(--soft);}
+.btn-ghost:hover{background:rgba(200,160,80,0.1);color:var(--ink);}
+.btn-icon{background:rgba(255,248,239,0.8);border:1px solid rgba(180,130,80,0.25);border-radius:3px;padding:4px 8px;cursor:pointer;font-size:14px;transition:all 0.15s;}
+.btn-icon:hover{background:rgba(200,160,80,0.18);transform:scale(1.08);}
+
+.form-box{
+  background:rgba(255,250,240,0.6);
+  border:1px dashed rgba(180,130,80,0.45);
+  border-radius:6px;padding:24px;margin-bottom:30px;
+  display:flex;flex-direction:column;gap:14px;
+  backdrop-filter:blur(8px);position:relative;
+}
+.form-box::before{
+  content:'';position:absolute;top:-6px;left:20px;width:50px;height:12px;
+  background:rgba(220,200,160,0.55);transform:rotate(-1deg);border-radius:2px;
+}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;}
+.form-row .input{flex:1;min-width:140px;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(20,10,5,0.6);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn 0.2s ease;
+}
+.modal{
+  background:var(--warm-white);border-radius:6px;padding:30px;
+  width:100%;max-width:480px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.3),0 0 0 2px rgba(200,160,80,0.4);
+  animation:slideUp 0.28s cubic-bezier(0.175,0.885,0.32,1.275);
+  position:relative;
+}
+.modal::before,.modal::after{content:'';position:absolute;width:20px;height:20px;border:1.5px solid var(--gold);}
+.modal::before{top:6px;left:6px;border-right:none;border-bottom:none;}
+.modal::after{bottom:6px;right:6px;border-left:none;border-top:none;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:var(--dark-brown);margin-bottom:20px;letter-spacing:1px;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--soft);transition:transform 0.15s;}
+.modal-close:hover{transform:scale(1.2) rotate(90deg);}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+
+/* ── POLAROID ── */
+.polaroid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:32px;padding:8px 0;}
+.polaroid{
+  background:#faf4e8;padding:12px 12px 48px;border-radius:2px;
+  box-shadow:0 8px 32px rgba(60,30,10,0.2),0 2px 8px rgba(0,0,0,0.08),inset 0 0 0 1px rgba(200,160,80,0.15);
+  position:relative;transform:rotate(var(--rot));
+  transition:transform 0.3s,box-shadow 0.3s;cursor:pointer;
+  border:6px solid transparent;
+  background-image:linear-gradient(#faf4e8,#faf4e8),linear-gradient(135deg,#c8a050,#e8d090,#a07838);
+  background-origin:border-box;background-clip:padding-box,border-box;
+}
+.polaroid:hover{transform:rotate(0deg) scale(1.05) translateY(-6px);box-shadow:0 18px 48px rgba(60,30,10,0.28);}
+.polaroid-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:1px;display:block;filter:saturate(0.85) sepia(0.08) contrast(1.05);}
+.polaroid-placeholder{width:100%;aspect-ratio:1;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,#ede0c8,#d4c4a8);}
+.polaroid-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;font-size:15px;color:#3a2418;padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.polaroid-date{position:absolute;bottom:2px;right:14px;font-family:'Caveat',cursive;font-size:10px;color:#c0a080;}
+.polaroid-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;z-index:5;opacity:0;transition:opacity 0.2s;}
+.polaroid:hover .polaroid-actions{opacity:1;}
+
+/* ── PLACES ── */
+.cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;}
+.cat-tab{
+  border:1px solid rgba(180,130,80,0.3);cursor:pointer;border-radius:999px;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;
+  padding:7px 18px;transition:all 0.2s;background:rgba(255,248,239,0.6);color:var(--soft);
+}
+.cat-tab:hover,.cat-tab.active{color:var(--ink);transform:translateY(-1px);}
+.cat-tab.active[data-cat="Art"]{background:linear-gradient(135deg,#e8c878,#d4a888);border-color:rgba(200,160,80,0.5);}
+.cat-tab.active[data-cat="Food"]{background:linear-gradient(135deg,#b0c8a0,#90b088);border-color:rgba(80,120,60,0.4);}
+.cat-tab.active[data-cat="Music"]{background:linear-gradient(135deg,#c0a0c8,#a888b8);border-color:rgba(120,80,140,0.4);}
+.cat-tab.active[data-cat="Experiences"]{background:linear-gradient(135deg,#d4a0a8,#b88090);border-color:rgba(160,80,90,0.4);}
+.cat-tab.active[data-cat="All"]{background:linear-gradient(135deg,var(--blush),var(--gold));border-color:rgba(200,160,80,0.5);}
+.cat-tab-add{
+  border:1px dashed rgba(180,130,80,0.5);cursor:pointer;border-radius:999px;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;
+  padding:7px 16px;background:transparent;color:var(--antique-gold);transition:all 0.2s;
+}
+.cat-tab-add:hover{background:rgba(200,160,80,0.12);transform:translateY(-1px);}
+.stamp-overlay{position:absolute;top:-12px;right:-8px;font-size:36px;transform:rotate(12deg);filter:drop-shadow(0 2px 5px rgba(0,0,0,0.15));animation:stampIn 0.35s cubic-bezier(0.175,0.885,0.32,1.275);}
+.cat-badge{display:inline-block;font-size:11px;font-family:'Cormorant Garamond',serif;padding:3px 12px;border-radius:999px;margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── LIST ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.list-panel{background:rgba(255,248,239,0.6);border-radius:4px;padding:22px;border:1px solid rgba(180,130,80,0.25);backdrop-filter:blur(6px);}
+.list-panel-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;margin-bottom:16px;color:var(--dark-brown);}
+.list-item{
+  display:flex;align-items:flex-start;gap:10px;background:rgba(255,248,239,0.9);
+  border:1px solid rgba(180,130,80,0.15);border-radius:3px;padding:12px 14px;margin-bottom:10px;
+  box-shadow:0 2px 10px rgba(100,60,20,0.07);transition:transform 0.15s;
+}
+.list-item:hover{transform:translateX(4px);}
+.list-item-body{flex:1;}
+.list-item-title{font-family:'Caveat',cursive;font-size:17px;color:var(--ink);}
+.list-item-note{font-size:12px;color:var(--soft);margin-top:2px;}
+.list-item-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;}
+
+/* ── STICKY ── */
+.sticky-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;padding:8px 0;}
+.sticky{
+  border-radius:2px;padding:24px;position:relative;min-height:150px;
+  box-shadow:3px 5px 18px rgba(0,0,0,0.12),inset 0 -1px 0 rgba(0,0,0,0.05);
+  transform:rotate(var(--rot));transition:transform 0.22s,box-shadow 0.22s;
+}
+.sticky:hover{transform:rotate(0deg) scale(1.04);box-shadow:6px 10px 30px rgba(0,0,0,0.18);z-index:2;}
+.sticky-title{font-family:'Caveat',cursive;font-size:19px;color:#2a1810;margin-bottom:8px;font-weight:700;}
+.sticky-body{font-size:13px;color:#5a3828;line-height:1.6;}
+.sticky-pin{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0%,var(--pin-color) 100%);box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+.sticky-actions{position:absolute;bottom:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity 0.2s;}
+.sticky:hover .sticky-actions{opacity:1;}
+
+/* ── WISHLIST PAGE ── */
+.scratch-header{text-align:center;padding:40px 20px 20px;position:relative;z-index:10;}
+.scratch-title{
+  font-family:'Caveat',cursive;font-size:clamp(36px,7vw,64px);color:var(--dark-brown);
+  text-shadow:2px 2px 0 rgba(200,160,80,0.3);position:relative;display:inline-block;transform:rotate(-1deg);
+}
+.scratch-subtitle{font-family:'Caveat',cursive;font-size:18px;color:var(--soft);margin-top:8px;}
+.tape{
+  display:inline-block;background:rgba(230,210,170,0.6);padding:4px 20px;border-radius:2px;
+  transform:rotate(-2deg);font-family:'Caveat',cursive;font-size:14px;color:var(--soft);
+  box-shadow:1px 2px 6px rgba(0,0,0,0.08);position:relative;
+}
+.wish-form-area{max-width:760px;margin:0 auto;padding:0 20px;position:relative;z-index:10;}
+.wish-input{
+  flex:1;min-width:200px;border:none;border-bottom:2px solid rgba(180,130,80,0.4);
+  border-radius:0;padding:8px 4px;font-family:'Caveat',cursive;font-size:18px;
+  color:var(--ink);background:transparent;outline:none;transition:border-color 0.2s;
+}
+.wish-input:focus{border-bottom-color:var(--rose);}
+.wish-input::placeholder{color:rgba(100,60,30,0.4);}
+.wish-input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.wish-color-picker{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.wish-color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.15s;}
+.wish-color-swatch.active{border-color:var(--dark-brown);transform:scale(1.25);}
+.wish-grid{max-width:1020px;margin:0 auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:28px;position:relative;z-index:10;}
+.wish-card{
+  position:relative;transform:rotate(var(--rot));transition:transform 0.25s,box-shadow 0.25s;cursor:pointer;
+  border-radius:3px;padding:22px 20px 50px;min-height:180px;
+  box-shadow:3px 6px 20px rgba(0,0,0,0.14),inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+.wish-card:hover{transform:rotate(0deg) scale(1.04) translateY(-4px);box-shadow:6px 14px 36px rgba(0,0,0,0.2);z-index:5;}
+.wish-card::after{content:'';position:absolute;inset:6px;border:1.5px dashed rgba(0,0,0,0.1);border-radius:2px;pointer-events:none;}
+.wish-card-tape{position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-1deg);width:50px;height:14px;background:rgba(230,210,170,0.65);border-radius:2px;box-shadow:1px 1px 3px rgba(0,0,0,0.08);}
+.wish-card-emoji{font-size:32px;margin-bottom:8px;display:block;}
+.wish-card-title{font-family:'Caveat',cursive;font-size:20px;color:#1e1008;font-weight:700;margin-bottom:6px;line-height:1.3;}
+.wish-card-note{font-family:'Caveat',cursive;font-size:14px;color:rgba(30,16,8,0.65);line-height:1.5;}
+.wish-card-date{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;font-size:11px;color:rgba(30,16,8,0.4);}
+.wish-card-done-stamp{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.15);border-radius:3px;font-size:40px;font-family:'Caveat',cursive;font-weight:700;
+  color:rgba(0,100,60,0.25);transform:rotate(-15deg);border:3px solid rgba(0,100,60,0.18);
+  letter-spacing:2px;pointer-events:none;
+}
+.wish-actions{position:absolute;bottom:24px;left:0;right:0;display:flex;justify-content:center;gap:8px;opacity:0;transition:opacity 0.2s;}
+.wish-card:hover .wish-actions{opacity:1;}
+.wish-countdown{text-align:center;margin:8px 0 28px;font-family:'Caveat',cursive;font-size:18px;color:var(--soft);position:relative;z-index:10;}
+.wish-stats{display:flex;justify-content:center;gap:28px;margin-bottom:28px;position:relative;z-index:10;flex-wrap:wrap;}
+.wish-stat{background:rgba(255,248,239,0.7);border:1px solid rgba(180,130,80,0.25);border-radius:4px;padding:12px 24px;text-align:center;font-family:'Caveat',cursive;}
+.wish-stat-num{font-size:28px;font-weight:700;color:var(--dark-brown);display:block;}
+.wish-stat-label{font-size:13px;color:var(--soft);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--soft);}
+.empty-icon{font-size:56px;margin-bottom:14px;}
+.empty-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;}
+
+/* ── USER / GOOGLE ── */
+.user-chip{display:flex;align-items:center;gap:6px;background:rgba(255,248,239,0.8);border-radius:999px;padding:4px 14px 4px 6px;border:1px solid rgba(180,130,80,0.35);font-family:'Caveat',cursive;font-size:14px;color:var(--ink);}
+.user-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;}
+.google-btn{
+  display:flex;align-items:center;gap:8px;background:rgba(255,248,239,0.9);border:1px solid rgba(180,130,80,0.4);
+  border-radius:999px;padding:7px 16px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:15px;color:var(--ink);transition:all 0.2s;white-space:nowrap;
+}
+.google-btn:hover{background:rgba(200,160,80,0.15);border-color:var(--antique-gold);transform:translateY(-1px);}
+.google-icon{width:16px;height:16px;}
+.signin-banner{
+  text-align:center;padding:10px 20px;
+  background:linear-gradient(135deg,rgba(212,168,160,0.3),rgba(200,160,80,0.25));
+  border-bottom:1px solid rgba(200,160,80,0.3);
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  position:relative;z-index:10;letter-spacing:0.5px;
+}
+
+.flex{display:flex;}.gap-2{gap:8px;}.gap-3{gap:12px;}.mt-1{margin-top:4px;}.mt-2{margin-top:8px;}
+label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--soft);}
+select.input{cursor:pointer;}
+
+/* ── MUSIC PLAYER ── */
+.music-player{
+  position:fixed;bottom:22px;left:22px;z-index:300;display:flex;align-items:center;gap:10px;
+  background:rgba(245,237,224,0.92);backdrop-filter:blur(16px);
+  border:1px solid rgba(200,160,80,0.45);border-radius:3px;padding:8px 16px 8px 10px;
+  box-shadow:0 4px 20px rgba(100,60,20,0.18);transition:all 0.3s;
+}
+.music-player:hover{box-shadow:0 6px 28px rgba(100,60,20,0.28);}
+.music-play-btn{
+  width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--dusty-rose),var(--antique-gold));
+  display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;
+  flex-shrink:0;color:#fff;box-shadow:0 2px 8px rgba(120,60,30,0.3);
+}
+.music-play-btn:hover{transform:scale(1.12);}
+.music-label{font-family:'Caveat',cursive;font-size:13px;color:var(--soft);white-space:nowrap;}
+.music-vol{-webkit-appearance:none;width:60px;height:3px;border-radius:2px;outline:none;cursor:pointer;background:linear-gradient(90deg,var(--rose),var(--antique-gold));}
+.music-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--antique-gold);cursor:pointer;}
+.music-note{font-size:13px;animation:floatA 2.5s ease-in-out infinite;display:inline-block;}
+.music-player.dark{background:rgba(20,10,5,0.92);border-color:rgba(200,160,80,0.4);}
+.music-player.dark .music-label{color:rgba(240,228,200,0.7);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:linear-gradient(135deg,#b87060,#c8a050);color:#fff8ef;font-family:'Caveat',cursive;font-size:17px;
+  padding:12px 22px;border-radius:3px;box-shadow:0 6px 24px rgba(100,60,20,0.25);
+  animation:toastIn 0.3s ease;pointer-events:none;letter-spacing:0.5px;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback, useMemo } = React;
+
+const rots=[-3.5,-1.8,0,1.6,2.8,-2.2,3,-1];
+const rot=i=>rots[i%rots.length];
+const stickyColors=["#fff3b0","#ffd6d6","#c8e8c0","#dcc8f0","#ffd8b0","#b8e4f8","#fce4ec","#d8f0e0"];
+const pinColors=["#d4a800","#d04040","#40a040","#7050c0","#c07030","#3080c0","#b04060","#308060"];
+const wishColors=[
+  {bg:"#fce4d8",label:"blush"},{bg:"#e8f4d8",label:"sage"},{bg:"#dce8f8",label:"sky"},
+  {bg:"#f4e0f4",label:"lilac"},{bg:"#fff3b8",label:"butter"},{bg:"#ffe0cc",label:"peach"},
+  {bg:"#e0f0e8",label:"mint"},{bg:"#f8e8d0",label:"parchment"},
+];
+const wishEmojis=["🌸","✨","🌙","🎨","🌿","🦋","💫","🎠","🌺","🍄","🌻","🎀","🌈","🦚","🎪"];
+const catColors={
+  Art:{bg:"linear-gradient(135deg,#e8c878,#d4a888)",text:"#4a2818"},
+  Food:{bg:"linear-gradient(135deg,#b0c8a0,#90a878)",text:"#1a3818"},
+  Music:{bg:"linear-gradient(135deg,#c0a0c8,#a080a8)",text:"#2a1038"},
+  Experiences:{bg:"linear-gradient(135deg,#d4a0a8,#b87880)",text:"#3a1018"},
+};
+const catEmoji={Art:"🎨",Food:"🍜",Music:"🎵",Experiences:"✨"};
+const BUNNIES=["🐰","🐇","🐾","🌸🐰","🐰✨","🎀🐇","🐇💫"];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"2-digit"});
+
+const storageKey=(user,tab)=>`wj_${user||'guest'}_${tab}`;
+const save=(user,tab,data)=>{try{localStorage.setItem(storageKey(user,tab),JSON.stringify(data));}catch(e){}};
+const load=(user,tab,def)=>{try{const v=localStorage.getItem(storageKey(user,tab));return v?JSON.parse(v):def;}catch(e){return def;}};
+
+function SparkleTitle(){
+  const [sparks,setSparks]=useState([]);
+  useEffect(()=>{
+    const make=()=>{
+      const id=uid();
+      const x=Math.random()*100; const y=Math.random()*100;
+      const size=4+Math.random()*6;
+      setSparks(s=>[...s,{id,x,y,size}]);
+      setTimeout(()=>setSparks(s=>s.filter(x=>x.id!==id)),2500);
+    };
+    make();
+    const t=setInterval(make,600);
+    return()=>clearInterval(t);
+  },[]);
+  return(
+    <div className="hero-title-wrap">
+      <div className="hero-title">Whimsy Journals</div>
+      {sparks.map(s=>(
+        <div key={s.id} style={{
+          position:"absolute",left:`${s.x}%`,top:`${s.y}%`,
+          width:s.size,height:s.size,
+          background:"radial-gradient(circle,#c8a050,#f0d080,transparent)",
+          borderRadius:"50%",animation:"sparkle 2.5s ease-in-out forwards",
+          pointerEvents:"none",boxShadow:`0 0 ${s.size*2}px rgba(200,160,80,0.8)`,
+        }}/>
+      ))}
+    </div>
+  );
+}
+
+const BG_JOURNAL=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(160deg,#f5ede0 0%,#ede0c8 45%,#f0e4d8 100%)"}}>
+    <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"65%",opacity:0.14}} viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice">
+      <ellipse cx="120" cy="460" rx="200" ry="140" fill="#7a9c78"/>
+      <ellipse cx="380" cy="490" rx="250" ry="110" fill="#a8c898"/>
+      <ellipse cx="660" cy="470" rx="220" ry="130" fill="#d4a0a0"/>
+      <ellipse cx="950" cy="450" rx="280" ry="120" fill="#c8b0d8"/>
+    </svg>
+    {[
+      {x:"7%",y:"12%",s:64,c:"#c89090",d:2},{x:"18%",y:"62%",s:44,c:"#9880b0",d:3.5},
+      {x:"48%",y:"6%",s:52,c:"#7a9c78",d:1.5},{x:"72%",y:"28%",s:48,c:"#c8a050",d:4},
+      {x:"86%",y:"68%",s:58,c:"#d4a0a0",d:2.5},{x:"33%",y:"82%",s:38,c:"#b0a0c8",d:5},
+      {x:"60%",y:"72%",s:44,c:"#7a9c78",d:3},{x:"91%",y:"18%",s:36,c:"#c8a050",d:1},
+    ].map((f,i)=>(
+      <div key={i} style={{position:"absolute",left:f.x,top:f.y,animation:`floatC ${6+i*0.8}s ease-in-out infinite`,animationDelay:`${f.d}s`}}>
+        <svg width={f.s} height={f.s} viewBox="0 0 60 60">
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55" transform="rotate(60 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55" transform="rotate(120 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55" transform="rotate(180 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55" transform="rotate(240 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} opacity="0.55" transform="rotate(300 30 30)"/>
+          <circle cx="30" cy="30" r="9" fill="#fff8ef" opacity="0.9"/>
+          <circle cx="30" cy="30" r="5" fill={f.c} opacity="0.8"/>
+        </svg>
+      </div>
+    ))}
+    {[0,1,2,3,4,5].map(i=>(
+      <div key={i} style={{position:"absolute",top:`${15+i*12}%`,left:"-60px",animation:`drift ${14+i*2.5}s linear infinite`,animationDelay:`${i*2.8}s`,opacity:0.4}}>
+        <svg width="20" height="26" viewBox="0 0 20 26"><ellipse cx="10" cy="13" rx="6" ry="11" fill={["#d4a0a0","#b0a0c8","#7a9c78","#c8a050","#c89090","#9880b0"][i]} transform={`rotate(${-10+i*7} 10 13)`}/></svg>
+      </div>
+    ))}
+    {[{x:"14%",y:"32%"},{x:"38%",y:"16%"},{x:"68%",y:"22%"},{x:"82%",y:"58%"},{x:"22%",y:"75%"},{x:"55%",y:"50%"},{x:"88%",y:"14%"}].map((s,i)=>(
+      <div key={i} style={{position:"absolute",left:s.x,top:s.y,animation:`twinkle ${2+i*0.4}s ease-in-out infinite`,animationDelay:`${i*0.6}s`,opacity:0.5}}>
+        <svg width={14+i%3*5} height={14+i%3*5} viewBox="0 0 20 20">
+          <path d="M10 0 L11.8 8.2 L20 10 L11.8 11.8 L10 20 L8.2 11.8 L0 10 L8.2 8.2 Z" fill={["#c8a050","#d4a0a0","#7a9c78","#c8a050","#9880b0","#c8a050","#d4a0a0"][i]} opacity="0.85"/>
+        </svg>
+      </div>
+    ))}
+  </div>
+);
+
+const BG_PLACES=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(155deg,#eaf0e0 0%,#d8e8c4 40%,#f0e8d8 100%)"}}>
+    <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"50%",opacity:0.18}} viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax slice">
+      <ellipse cx="200" cy="420" rx="320" ry="200" fill="#5a8c56"/>
+      <ellipse cx="620" cy="450" rx="380" ry="170" fill="#7a9c78"/>
+      <ellipse cx="1050" cy="430" rx="300" ry="190" fill="#6a9060"/>
+    </svg>
+    {[{x:"4%",y:"68%",s:1},{x:"20%",y:"74%",s:0.7},{x:"52%",y:"70%",s:0.9},{x:"76%",y:"66%",s:1.1},{x:"91%",y:"72%",s:0.8}].map((m,i)=>(
+      <div key={i} style={{position:"absolute",left:m.x,top:m.y,transform:`scale(${m.s})`,animation:`floatB ${5+i}s ease-in-out infinite`,animationDelay:`${i*1.2}s`}}>
+        <svg width="38" height="52" viewBox="0 0 38 52">
+          <ellipse cx="19" cy="22" rx="18" ry="14" fill={["#c84040","#c07030","#904898","#a83030","#c85828"][i]} opacity="0.7"/>
+          <circle cx="9" cy="17" r="4" fill="white" opacity="0.65"/>
+          <circle cx="22" cy="13" r="3" fill="white" opacity="0.65"/>
+          <circle cx="28" cy="22" r="2.5" fill="white" opacity="0.65"/>
+          <rect x="14" y="34" width="10" height="18" rx="4" fill="#e8d8b8" opacity="0.9"/>
+        </svg>
+      </div>
+    ))}
+    {[0,1,2,3].map(i=>(
+      <div key={i} style={{position:"absolute",top:`${28+i*15}%`,left:"-50px",animation:`drift ${15+i*2}s linear infinite`,animationDelay:`${i*3.5}s`,opacity:0.45}}>
+        <svg width="28" height="20" viewBox="0 0 28 20"><ellipse cx="14" cy="10" rx="12" ry="7" fill={["#7a9c78","#5a8c56","#a0c890","#6aac70"][i]} transform={`rotate(${-20+i*15} 14 10)`}/></svg>
+      </div>
+    ))}
+    {[{x:"10%",y:"18%"},{x:"44%",y:"10%"},{x:"78%",y:"20%"},{x:"64%",y:"44%"}].map((s,i)=>(
+      <div key={i} style={{position:"absolute",left:s.x,top:s.y,animation:`twinkle ${2+i*0.6}s ease-in-out infinite`,animationDelay:`${i*0.9}s`}}>
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 0 L9.4 6.6 L16 8 L9.4 9.4 L8 16 L6.6 9.4 L0 8 L6.6 6.6 Z" fill="#c8a050" opacity="0.8"/></svg>
+      </div>
+    ))}
+  </div>
+);
+
+const BG_MOVIES=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(150deg,#1a0a2e 0%,#2d1248 45%,#1e0e38 100%)"}}>
+    <div style={{position:"absolute",inset:0,opacity:0.14,backgroundImage:"radial-gradient(ellipse at 20% 30%,#4a1e68 0%,transparent 50%),radial-gradient(ellipse at 80% 70%,#3a1858 0%,transparent 50%)"}}/>
+    {Array.from({length:60},(_,i)=>(
+      <div key={i} style={{
+        position:"absolute",left:`${(i*41+17)%100}%`,top:`${(i*31+9)%85}%`,
+        width:i%6===0?3:i%3===0?2:1,height:i%6===0?3:i%3===0?2:1,
+        borderRadius:"50%",background:i%4===0?"#c8a0e8":"#fff",
+        animation:`twinkle ${1.5+(i%5)*0.5}s ease-in-out infinite`,
+        animationDelay:`${(i*0.25)%3}s`,opacity:i%4===0?0.9:0.55
+      }}/>
+    ))}
+    {[{x:"4%",y:"18%",s:0.75,d:0},{x:"76%",y:"8%",s:0.65,d:1.5},{x:"86%",y:"52%",s:0.82,d:3},{x:"2%",y:"62%",s:0.68,d:2}].map((f,i)=>(
+      <div key={i} style={{position:"absolute",left:f.x,top:f.y,transform:`scale(${f.s})`,animation:`floatB ${7+i}s ease-in-out infinite`,animationDelay:`${f.d}s`,opacity:0.35}}>
+        <svg width="90" height="110" viewBox="0 0 90 110">
+          <rect x="4" y="4" width="82" height="102" rx="4" fill="none" stroke="#b888d8" strokeWidth="2.5"/>
+          <rect x="10" y="10" width="70" height="90" rx="2" fill="none" stroke="#b888d8" strokeWidth="1"/>
+          <circle cx="4" cy="4" r="4" fill="#b888d8"/><circle cx="86" cy="4" r="4" fill="#b888d8"/>
+          <circle cx="4" cy="106" r="4" fill="#b888d8"/><circle cx="86" cy="106" r="4" fill="#b888d8"/>
+        </svg>
+      </div>
+    ))}
+    {[{x:"25%",y:"22%",c:"rgba(160,100,200,0.18)",s:140},{x:"68%",y:"58%",c:"rgba(200,140,220,0.12)",s:180},{x:"10%",y:"68%",c:"rgba(120,80,200,0.14)",s:110}].map((o,i)=>(
+      <div key={i} style={{position:"absolute",left:o.x,top:o.y,width:o.s,height:o.s,borderRadius:"50%",background:o.c,filter:"blur(35px)",animation:`shimmer ${5+i}s ease-in-out infinite`,animationDelay:`${i*1.8}s`}}/>
+    ))}
+    <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"40%",opacity:0.18}} viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax slice">
+      {[50,200,380,550,720,900,1080].map((x,i)=>(
+        <g key={i} transform={`translate(${x},0)`}>
+          <ellipse cx="30" cy="320" rx="18" ry="80" fill={i%2===0?"#3a1858":"#2a1248"}/>
+          <ellipse cx="20" cy="270" rx="28" ry="18" fill={i%2===0?"#3a1858":"#2a1248"}/>
+          <ellipse cx="40" cy="250" rx="24" ry="15" fill={i%2===0?"#3a1858":"#2a1248"}/>
+        </g>
+      ))}
+    </svg>
+  </div>
+);
+
+const BG_BOOKS=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(150deg,#f8f0e0 0%,#f0e4c4 40%,#ead8b8 100%)"}}>
+    <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%,rgba(180,120,50,0.15) 0%,transparent 65%)"}}/>
+    {[{x:"7%",y:"22%",r:-15,d:0},{x:"78%",y:"32%",r:12,d:2},{x:"52%",y:"12%",r:-8,d:1},{x:"22%",y:"62%",r:6,d:3},{x:"68%",y:"68%",r:-10,d:1.5}].map((p,i)=>(
+      <div key={i} style={{position:"absolute",left:p.x,top:p.y,transform:`rotate(${p.r}deg)`,animation:`floatC ${6+i}s ease-in-out infinite`,animationDelay:`${p.d}s`,opacity:0.25}}>
+        <svg width="44" height="58" viewBox="0 0 44 58">
+          <rect x="2" y="2" width="40" height="54" rx="2" fill="#f8f0e0" stroke="#c8a050" strokeWidth="1.5"/>
+          {[12,18,24,30,36,42].map((y,j)=>(
+            <line key={j} x1="8" y1={y} x2={j%3===2?28:36} y2={y} stroke="#d4b880" strokeWidth="1.2"/>
+          ))}
+        </svg>
+      </div>
+    ))}
+    {[0,1,2,3,4].map(i=>(
+      <div key={i} style={{position:"absolute",top:`${14+i*14}%`,left:"-40px",animation:`drift ${13+i*2.5}s linear infinite`,animationDelay:`${i*2.8}s`,opacity:0.4}}>
+        <svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2 C17 6 20 12 16 20 C12 14 7 14 5 20 C1 12 5 6 11 2Z" fill={["#c8703a","#d4904a","#a05020","#e0a060","#b06830"][i]}/></svg>
+      </div>
+    ))}
+    <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:"38%",opacity:0.07}} viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">
+      {[0,70,130,200,270,330,400,460,520,580,640,700,760,820,880,940,1000,1060,1120].map((x,i)=>(
+        <rect key={i} x={x} y={260-(i%4)*28} width={58+(i%3)*10} height={270+(i%4)*28} rx="2" fill={["#8b5e3c","#a0724e","#7a4e2c","#956040","#b08060"][i%5]}/>
+      ))}
+      <rect x="0" y="290" width="1200" height="10" fill="#6b4020"/>
+    </svg>
+  </div>
+);
+
+const BG_IDEAS=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(140deg,#f0e8f8 0%,#e8eef8 40%,#f8f0e8 100%)"}}>
+    {[{x:"4%",y:"14%",s:1.2,d:0},{x:"58%",y:"7%",s:0.9,d:2},{x:"28%",y:"44%",s:1.0,d:4},{x:"78%",y:"32%",s:0.8,d:1.5}].map((c,i)=>(
+      <div key={i} style={{position:"absolute",left:c.x,top:c.y,transform:`scale(${c.s})`,animation:`cloudDrift ${8+i*1.5}s ease-in-out infinite`,animationDelay:`${c.d}s`,opacity:0.32}}>
+        <svg width="100" height="50" viewBox="0 0 100 50">
+          <ellipse cx="50" cy="35" rx="45" ry="20" fill="white"/>
+          <ellipse cx="30" cy="30" rx="25" ry="18" fill="white"/>
+          <ellipse cx="65" cy="28" rx="28" ry="20" fill="white"/>
+          <ellipse cx="50" cy="25" rx="22" ry="18" fill="white"/>
+        </svg>
+      </div>
+    ))}
+    {[{x:"15%",y:"30%"},{x:"40%",y:"18%"},{x:"72%",y:"25%"},{x:"85%",y:"60%"},{x:"25%",y:"72%"},{x:"55%",y:"55%"},{x:"90%",y:"15%"}].map((s,i)=>(
+      <div key={i} style={{position:"absolute",left:s.x,top:s.y,animation:`twinkle ${1.8+i*0.4}s ease-in-out infinite`,animationDelay:`${i*0.5}s`,opacity:0.55}}>
+        <svg width={16+i%3*6} height={16+i%3*6} viewBox="0 0 20 20">
+          <path d="M10 0 L11.8 8.2 L20 10 L11.8 11.8 L10 20 L8.2 11.8 L0 10 L8.2 8.2 Z" fill={["#b0a0c8","#d4a0a0","#7a9c78","#c8a050","#9880b0","#c8a050","#d4a0a0"][i]}/>
+        </svg>
+      </div>
+    ))}
+  </div>
+);
+
+const BG_WISHLIST=()=>(
+  <div className="bg-layer" style={{background:"linear-gradient(160deg,#f4e8d0 0%,#ead8b8 45%,#f0dcc8 100%)"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(150,100,60,0.08) 28px)",pointerEvents:"none"}}/>
+    <div style={{position:"absolute",top:0,bottom:0,left:"12%",width:1,background:"rgba(200,60,60,0.15)"}}/>
+    {[
+      {x:"2%",y:"10%",s:70,c:"#d4a0a0",d:2},{x:"88%",y:"8%",s:55,c:"#7a9c78",d:3},
+      {x:"3%",y:"70%",s:60,c:"#9880b0",d:1},{x:"90%",y:"68%",s:65,c:"#c8a050",d:4},
+      {x:"45%",y:"3%",s:40,c:"#d4a0a0",d:2.5},
+    ].map((f,i)=>(
+      <div key={i} style={{position:"absolute",left:f.x,top:f.y,animation:`floatB ${7+i}s ease-in-out infinite`,animationDelay:`${f.d}s`,opacity:0.18}}>
+        <svg width={f.s} height={f.s} viewBox="0 0 60 60">
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c}/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} transform="rotate(72 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} transform="rotate(144 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} transform="rotate(216 30 30)"/>
+          <ellipse cx="30" cy="14" rx="10" ry="14" fill={f.c} transform="rotate(288 30 30)"/>
+          <circle cx="30" cy="30" r="8" fill="#fff8ef" opacity="0.9"/>
+        </svg>
+      </div>
+    ))}
+    {[{x:"20%",y:"25%"},{x:"60%",y:"15%"},{x:"78%",y:"40%"},{x:"35%",y:"80%"}].map((s,i)=>(
+      <div key={i} style={{position:"absolute",left:s.x,top:s.y,animation:`twinkle ${2+i*0.5}s ease-in-out infinite`,animationDelay:`${i*0.7}s`,opacity:0.4}}>
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 0 L8.4 5.6 L14 7 L8.4 8.4 L7 14 L5.6 8.4 L0 7 L5.6 5.6 Z" fill="#c8a050"/></svg>
+      </div>
+    ))}
+  </div>
+);
+
+const BACKGROUNDS={journal:BG_JOURNAL,places:BG_PLACES,movies:BG_MOVIES,books:BG_BOOKS,ideas:BG_IDEAS,wishlist:BG_WISHLIST};
+
+function Toast({msg}){return msg?<div className="toast">{msg}</div>:null;}
+
+function EditModal({fields,values,onChange,onSave,onClose}){
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-title">✦ edit entry</div>
+        <button className="modal-close" onClick={onClose}>✕</button>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          {fields.map(f=>(
+            <div key={f.key}>
+              <label>{f.label}</label>
+              {f.type==="textarea"
+                ?<textarea className="input textarea" style={{marginTop:4}} value={values[f.key]||""} onChange={e=>onChange(f.key,e.target.value)}/>
+                :f.type==="select"
+                  ?<select className="input" style={{marginTop:4}} value={values[f.key]||""} onChange={e=>onChange(f.key,e.target.value)}>
+                      {f.options.map(o=><option key={o}>{o}</option>)}
+                    </select>
+                  :<input className="input" style={{marginTop:4}} value={values[f.key]||""} onChange={e=>onChange(f.key,e.target.value)}/>
+              }
+            </div>
+          ))}
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>cancel</button>
+          <button className="btn btn-primary btn-sm" onClick={onSave}>✦ save changes</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function JournalSection({user,toast}){
+  const [entries,setEntries]=useState(()=>load(user,"journal",[]));
+  const [caption,setCaption]=useState("");
+  const [imgSrc,setImgSrc]=useState(null);
+  const [emoji,setEmoji]=useState("🌸");
+  const [editing,setEditing]=useState(null);
+  const [editVals,setEditVals]=useState({});
+  const fileRef=useRef();
+  const EMOJIS=["🌸","🌻","✨","🍄","🌙","🦋","🎨","💫","🌿","🎠","🌺","🦚"];
+  useEffect(()=>{save(user,"journal",entries);},[entries,user]);
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImgSrc(ev.target.result);r.readAsDataURL(f);};
+  const add=()=>{
+    if(!caption&&!imgSrc)return;
+    setEntries([{id:uid(),caption,imgSrc,emoji,date:today()},...entries]);
+    setCaption("");setImgSrc(null);if(fileRef.current)fileRef.current.value="";
+    toast("memory added ✨");
+  };
+  const remove=id=>{setEntries(entries.filter(x=>x.id!==id));toast("removed 🌿");};
+  const openEdit=e=>{setEditing(e.id);setEditVals({caption:e.caption,emoji:e.emoji});};
+  const saveEdit=()=>{setEntries(entries.map(e=>e.id===editing?{...e,...editVals}:e));setEditing(null);toast("updated ✦");};
+  return(
+    <div className="section">
+      <div className="section-title">Journal</div>
+      <div className="form-box">
+        <div className="form-row">
+          <div style={{flex:1}}>
+            <label>caption</label>
+            <input className="input" style={{marginTop:5}} value={caption} onChange={e=>setCaption(e.target.value)} placeholder="write something dreamy..." onKeyDown={e=>e.key==="Enter"&&add()}/>
+          </div>
+          <div>
+            <label>vibe</label>
+            <div className="flex gap-2" style={{flexWrap:"wrap",marginTop:5,maxWidth:220}}>
+              {EMOJIS.map(e=>(
+                <button key={e} onClick={()=>setEmoji(e)} style={{fontSize:18,border:"none",cursor:"pointer",background:emoji===e?"rgba(200,160,80,0.2)":"transparent",borderRadius:4,padding:"2px 4px",transition:"all 0.15s",transform:emoji===e?"scale(1.2)":"scale(1)"}}>{e}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2" style={{alignItems:"center"}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>fileRef.current?.click()}>📎 add photo</button>
+          {imgSrc&&<span style={{fontSize:12,color:"var(--soft)"}}>photo ready ✓</span>}
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={onFile}/>
+        </div>
+        <button className="btn btn-primary btn-sm" style={{alignSelf:"flex-end"}} onClick={add}>✦ add to album</button>
+      </div>
+      {entries.length===0
+        ?<div className="empty"><div className="empty-icon">📷</div><div className="empty-text">your album is waiting for memories ~</div></div>
+        :<div className="polaroid-grid">
+            {entries.map((e,i)=>(
+              <div key={e.id} className="polaroid" style={{"--rot":`${rot(i)}deg`}}>
+                {e.imgSrc?<img className="polaroid-img" src={e.imgSrc} alt={e.caption}/>
+                          :<div className="polaroid-placeholder">{e.emoji}</div>}
+                <div className="polaroid-caption">{e.caption||e.emoji}</div>
+                <div className="polaroid-date">{e.date}</div>
+                <div className="polaroid-actions">
+                  <button className="btn-icon" onClick={()=>openEdit(e)} title="edit">✏️</button>
+                  <button className="btn-icon" onClick={()=>remove(e.id)} title="delete" style={{color:"#904030"}}>🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
+      }
+      {editing&&<EditModal fields={[{key:"caption",label:"caption",type:"text"},{key:"emoji",label:"vibe emoji",type:"text"}]} values={editVals} onChange={(k,v)=>setEditVals({...editVals,[k]:v})} onSave={saveEdit} onClose={()=>setEditing(null)}/>}
+    </div>
+  );
+}
+
+function PlacesSection({user,toast}){
+  const DEFAULT_CATS=["Art","Food","Music","Experiences"];
+  const [customCats,setCustomCats]=useState(()=>load(user,"places_cats",[]));
+  const CATS=["All",...DEFAULT_CATS,...customCats.map(c=>c.name)];
+  const [places,setPlaces]=useState(()=>load(user,"places",[]));
+  const [name,setName]=useState("");const [note,setNote]=useState("");
+  const [cat,setCat]=useState("Art");const [filter,setFilter]=useState("All");
+  const [bunny,setBunny]=useState("🐰");
+  const [imgSrc,setImgSrc]=useState(null);
+  const fileRef=useRef();
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImgSrc(ev.target.result);r.readAsDataURL(f);};
+  const [showNewCat,setShowNewCat]=useState(false);const [newCatName,setNewCatName]=useState("");
+  const [editing,setEditing]=useState(null);const [editVals,setEditVals]=useState({});
+  useEffect(()=>{save(user,"places",places);},[places,user]);
+  useEffect(()=>{save(user,"places_cats",customCats);},[customCats,user]);
+  const allCatNames=[...DEFAULT_CATS,...customCats.map(c=>c.name)];
+  const customPalette=["linear-gradient(135deg,#a0c8d4,#80a8c0)","linear-gradient(135deg,#d4c0a0,#b89870)","linear-gradient(135deg,#c0d4a0,#a0b878)","linear-gradient(135deg,#d4a0c0,#b878a0)"];
+  const getCatColor=c=>{
+    if(catColors[c])return catColors[c];
+    const cc=customCats.find(x=>x.name===c);
+    const idx=cc?customCats.indexOf(cc):0;
+    return {bg:customPalette[idx%customPalette.length],text:"#2a2018"};
+  };
+  const getCatEmoji=c=>catEmoji[c]||(customCats.find(x=>x.name===c)?.emoji)||"🏷️";
+  const addCategory=()=>{
+    const n=newCatName.trim();
+    if(!n||allCatNames.includes(n))return;
+    const emojis=["🏷️","🌟","🎈","🔖","🪄","🧭"];
+    setCustomCats([...customCats,{name:n,emoji:emojis[customCats.length%emojis.length]}]);
+    setCat(n);setNewCatName("");setShowNewCat(false);toast("category added ✨");
+  };
+  const add=()=>{if(!name)return;setPlaces([{id:uid(),name,note,cat,visited:false,imgSrc},...places]);setName("");setNote("");setImgSrc(null);if(fileRef.current)fileRef.current.value="";toast("place added 🗺️");};
+  const stamp=id=>{setPlaces(places.map(p=>p.id===id?{...p,visited:!p.visited,bunnyStamp:bunny}:p));toast(places.find(p=>p.id===id)?.visited?"unstamped 🌿":"stamped "+bunny);};
+  const remove=id=>{setPlaces(places.filter(p=>p.id!==id));toast("removed 🌿");};
+  const openEdit=p=>{setEditing(p.id);setEditVals({name:p.name,note:p.note,cat:p.cat});};
+  const saveEdit=()=>{setPlaces(places.map(p=>p.id===editing?{...p,...editVals}:p));setEditing(null);toast("updated ✦");};
+  const visible=filter==="All"?places:places.filter(p=>p.cat===filter);
+  return(
+    <div className="section">
+      <div className="section-title">Places to Explore</div>
+      <div className="form-box">
+        <div className="form-row">
+          <input className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="place name..." onKeyDown={e=>e.key==="Enter"&&add()}/>
+          <select className="input" style={{maxWidth:170}} value={cat} onChange={e=>setCat(e.target.value)}>
+            {allCatNames.map(c=><option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <input className="input" value={note} onChange={e=>setNote(e.target.value)} placeholder="a little note about it..."/>
+        <div className="flex gap-2" style={{alignItems:"center",flexWrap:"wrap"}}>
+          <label>stamp:</label>
+          {BUNNIES.map(b=>(
+            <button key={b} onClick={()=>setBunny(b)} style={{fontSize:16,border:"none",cursor:"pointer",background:bunny===b?"rgba(200,160,80,0.2)":"transparent",borderRadius:4,padding:"3px 6px",transition:"all 0.15s",transform:bunny===b?"scale(1.2)":"scale(1)"}}>{b}</button>
+          ))}
+        </div>
+        <div className="flex gap-2" style={{alignItems:"center"}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>fileRef.current?.click()}>📎 add photo</button>
+          {imgSrc&&<span style={{fontSize:12,color:"var(--soft)"}}>photo ready ✓</span>}
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={onFile}/>
+        </div>
+        <button className="btn btn-primary btn-sm" style={{alignSelf:"flex-end"}} onClick={add}>✦ add place</button>
+      </div>
+      <div className="cat-tabs">
+        {CATS.map(c=>(
+          <button key={c} data-cat={DEFAULT_CATS.includes(c)||c==="All"?c:"All"} className={`cat-tab ${filter===c?"active":""}`} style={filter===c&&!DEFAULT_CATS.includes(c)&&c!=="All"?{background:getCatColor(c).bg}:{}} onClick={()=>setFilter(c)}>
+            {c!=="All"?getCatEmoji(c):"🌍"} {c}
+          </button>
+        ))}
+        {showNewCat
+          ?<div className="flex gap-2" style={{alignItems:"center"}}>
+              <input className="input" style={{width:140,padding:"6px 10px"}} autoFocus value={newCatName} onChange={e=>setNewCatName(e.target.value)} placeholder="new category..." onKeyDown={e=>e.key==="Enter"&&addCategory()}/>
+              <button className="btn btn-primary btn-sm" onClick={addCategory}>add</button>
+              <button className="btn btn-ghost btn-sm" onClick={()=>{setShowNewCat(false);setNewCatName("");}}>✕</button>
+            </div>
+          :<button className="cat-tab-add" onClick={()=>setShowNewCat(true)}>+ new category</button>
+        }
+      </div>
+      {visible.length===0
+        ?<div className="empty"><div className="empty-icon">🗺️</div><div className="empty-text">no places yet — add an adventure!</div></div>
+        :<div className="grid-3">
+            {visible.map((p,i)=>(
+              <div key={p.id} className="card" style={{opacity:p.visited?0.9:1}}>
+                {p.visited&&<div className="stamp-overlay">{p.bunnyStamp||"🐰"}</div>}
+                {p.imgSrc&&<img className="card-photo" src={p.imgSrc} alt={p.name}/>}
+                <div style={{position:"absolute",top:12,right:12,display:"flex",gap:4,zIndex:5}}>
+                  <button className="btn-icon" onClick={()=>openEdit(p)}>✏️</button>
+                  <button className="btn-icon" onClick={()=>remove(p.id)} style={{color:"#904030"}}>🗑</button>
+                </div>
+                <div className="cat-badge" style={{background:getCatColor(p.cat).bg,color:getCatColor(p.cat).text}}>{getCatEmoji(p.cat)} {p.cat}</div>
+                <div style={{fontFamily:"'Caveat',cursive",fontSize:20,color:"var(--ink)",marginBottom:4,paddingRight:60}}>{p.name}</div>
+                {p.note&&<div style={{fontSize:13,color:"var(--soft)",marginBottom:12}}>{p.note}</div>}
+                <button className={`btn btn-sm ${p.visited?"btn-ghost":"btn-primary"}`} style={{marginTop:8}} onClick={()=>stamp(p.id)}>
+                  {p.visited?"✓ visited!":"🐰 stamp it"}
+                </button>
+              </div>
+            ))}
+          </div>
+      }
+      {editing&&<EditModal fields={[{key:"name",label:"place name"},{key:"cat",label:"category",type:"select",options:allCatNames},{key:"note",label:"note",type:"textarea"}]} values={editVals} onChange={(k,v)=>setEditVals({...editVals,[k]:v})} onSave={saveEdit} onClose={()=>setEditing(null)}/>}
+    </div>
+  );
+}
+
+function ListSection({icon,title,noun,accentColor,storeKey,user,toast}){
+  const [watchList,setWatchList]=useState(()=>load(user,storeKey+"_w",[]));
+  const [recList,setRecList]=useState(()=>load(user,storeKey+"_r",[]));
+  const [input,setInput]=useState("");const [note,setNote]=useState("");
+  const [imgSrc,setImgSrc]=useState(null);
+  const fileRef=useRef();
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImgSrc(ev.target.result);r.readAsDataURL(f);};
+  const [editing,setEditing]=useState(null);const [editVals,setEditVals]=useState({});const [editList,setEditList]=useState("w");
+  useEffect(()=>{save(user,storeKey+"_w",watchList);},[watchList,user]);
+  useEffect(()=>{save(user,storeKey+"_r",recList);},[recList,user]);
+  const addToWatch=()=>{if(!input)return;setWatchList([...watchList,{id:uid(),title:input,note,imgSrc}]);setInput("");setNote("");setImgSrc(null);if(fileRef.current)fileRef.current.value="";toast("added ✨");};
+  const moveToRec=item=>{setWatchList(watchList.filter(x=>x.id!==item.id));setRecList([{...item},...recList]);toast("moved to recommend ⭐");};
+  const removeW=id=>{setWatchList(watchList.filter(x=>x.id!==id));toast("removed 🌿");};
+  const removeR=id=>{setRecList(recList.filter(x=>x.id!==id));toast("removed 🌿");};
+  const openEditW=item=>{setEditList("w");setEditing(item.id);setEditVals({title:item.title,note:item.note||""});};
+  const openEditR=item=>{setEditList("r");setEditing(item.id);setEditVals({title:item.title,note:item.note||""});};
+  const saveEdit=()=>{
+    if(editList==="w")setWatchList(watchList.map(x=>x.id===editing?{...x,...editVals}:x));
+    else setRecList(recList.map(x=>x.id===editing?{...x,...editVals}:x));
+    setEditing(null);toast("updated ✦");
+  };
+  const isDark=storeKey==="movies";
+  const panelStyle=isDark?{background:"rgba(35,14,55,0.55)",borderColor:"rgba(180,120,210,0.25)"}:{};
+  const titleColor=isDark?"#d8a8e8":accentColor;
+  return(
+    <div className={`section${isDark?" dark-page":""}`}>
+      <div className="section-title" style={isDark?{color:"#e8c878",borderBottomColor:"rgba(200,160,80,0.3)"}:{}}>{icon} {title}</div>
+      <div className="form-box" style={isDark?{background:"rgba(35,14,55,0.5)",borderColor:"rgba(180,120,210,0.35)"}:{}}>
+        <input className="input" value={input} onChange={e=>setInput(e.target.value)} placeholder={`${noun} title...`} onKeyDown={e=>e.key==="Enter"&&addToWatch()} style={isDark?{background:"rgba(255,255,255,0.08)",color:"#f0e8d0",borderColor:"rgba(180,120,210,0.4)"}:{}}/>
+        <input className="input" value={note} onChange={e=>setNote(e.target.value)} placeholder="notes, where to find it..." style={isDark?{background:"rgba(255,255,255,0.08)",color:"#f0e8d0",borderColor:"rgba(180,120,210,0.4)"}:{}}/>
+        <div className="flex gap-2" style={{alignItems:"center"}}>
+          <button className="btn btn-ghost btn-sm" style={isDark?{borderColor:"rgba(180,120,210,0.4)",color:"#d8c0e8"}:{}} onClick={()=>fileRef.current?.click()}>📎 add photo</button>
+          {imgSrc&&<span style={{fontSize:12,color:isDark?"#d8c0e8":"var(--soft)"}}>photo ready ✓</span>}
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={onFile}/>
+        </div>
+        <button className="btn btn-primary btn-sm" style={{alignSelf:"flex-end",...(isDark?{background:"linear-gradient(135deg,#5a2870,#9858c0)"}:{})}} onClick={addToWatch}>✦ add to list</button>
+      </div>
+      <div className="two-col">
+        <div className="list-panel" style={panelStyle}>
+          <div className="list-panel-title" style={{color:titleColor}}>📋 want to {noun==="Movie"?"watch":"read"}</div>
+          {watchList.length===0
+            ?<div className="empty" style={{padding:"16px 0"}}><div className="empty-text" style={{fontSize:16,color:isDark?"rgba(240,228,200,0.5)":"var(--soft)"}}>nothing yet ~</div></div>
+            :watchList.map(item=>(
+              <div key={item.id} className="list-item" style={isDark?{background:"rgba(45,18,65,0.6)",borderColor:"rgba(180,120,210,0.18)"}:{}}>
+                {item.imgSrc?<img src={item.imgSrc} alt={item.title} style={{width:40,height:40,objectFit:"cover",borderRadius:10,flexShrink:0}}/>:<div style={{fontSize:20}}>{icon}</div>}
+                <div className="list-item-body">
+                  <div className="list-item-title" style={isDark?{color:"#f0e8d0"}:{}}>{item.title}</div>
+                  {item.note&&<div className="list-item-note" style={isDark?{color:"rgba(240,228,200,0.55)"}:{}}>{item.note}</div>}
+                </div>
+                <div className="list-item-actions">
+                  <button className="btn-icon" onClick={()=>openEditW(item)}>✏️</button>
+                  <button className="btn btn-primary btn-sm" onClick={()=>moveToRec(item)}>✓ done</button>
+                  <button className="btn-icon" onClick={()=>removeW(item.id)} style={{color:"#904030"}}>🗑</button>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <div className="list-panel" style={panelStyle}>
+          <div className="list-panel-title" style={{color:titleColor}}>⭐ recommend</div>
+          {recList.length===0
+            ?<div className="empty" style={{padding:"16px 0"}}><div className="empty-text" style={{fontSize:16,color:isDark?"rgba(240,228,200,0.5)":"var(--soft)"}}>finish one to recommend it ~</div></div>
+            :recList.map(item=>(
+              <div key={item.id} className="list-item" style={isDark?{background:"rgba(60,24,80,0.6)",borderColor:"rgba(180,120,210,0.18)"}:{background:"rgba(245,235,220,0.7)"}}>
+                {item.imgSrc?<img src={item.imgSrc} alt={item.title} style={{width:40,height:40,objectFit:"cover",borderRadius:10,flexShrink:0}}/>:<div style={{fontSize:20}}>⭐</div>}
+                <div className="list-item-body">
+                  <div className="list-item-title" style={isDark?{color:"#f0e8d0"}:{}}>{item.title}</div>
+                  {item.note&&<div className="list-item-note" style={isDark?{color:"rgba(240,228,200,0.55)"}:{}}>{item.note}</div>}
+                </div>
+                <div className="list-item-actions">
+                  <button className="btn-icon" onClick={()=>openEditR(item)}>✏️</button>
+                  <button className="btn-icon" onClick={()=>removeR(item.id)} style={{color:"#904030"}}>🗑</button>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      {editing&&<EditModal fields={[{key:"title",label:"title"},{key:"note",label:"note",type:"textarea"}]} values={editVals} onChange={(k,v)=>setEditVals({...editVals,[k]:v})} onSave={saveEdit} onClose={()=>setEditing(null)}/>}
+    </div>
+  );
+}
+
+function IdeasSection({user,toast}){
+  const [ideas,setIdeas]=useState(()=>load(user,"ideas",[]));
+  const [title,setTitle]=useState("");const [body,setBody]=useState("");
+  const [colorIdx,setColorIdx]=useState(0);
+  const [imgSrc,setImgSrc]=useState(null);
+  const fileRef=useRef();
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImgSrc(ev.target.result);r.readAsDataURL(f);};
+  const [editing,setEditing]=useState(null);const [editVals,setEditVals]=useState({});
+  useEffect(()=>{save(user,"ideas",ideas);},[ideas,user]);
+  const add=()=>{if(!title&&!body)return;setIdeas([{id:uid(),title,body,colorIdx,imgSrc},...ideas]);setTitle("");setBody("");setColorIdx(Math.floor(Math.random()*stickyColors.length));setImgSrc(null);if(fileRef.current)fileRef.current.value="";toast("idea pinned 💡");};
+  const remove=id=>{setIdeas(ideas.filter(x=>x.id!==id));toast("removed 🌿");};
+  const openEdit=idea=>{setEditing(idea.id);setEditVals({title:idea.title,body:idea.body});};
+  const saveEdit=()=>{setIdeas(ideas.map(x=>x.id===editing?{...x,...editVals}:x));setEditing(null);toast("updated ✦");};
+  return(
+    <div className="section">
+      <div className="section-title">Ideas Board</div>
+      <div className="form-box">
+        <input className="input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="idea title..." onKeyDown={e=>e.key==="Enter"&&add()}/>
+        <textarea className="input textarea" value={body} onChange={e=>setBody(e.target.value)} placeholder="describe the dream..."/>
+        <div className="flex gap-2" style={{alignItems:"center",flexWrap:"wrap"}}>
+          <label>sticky color:</label>
+          {stickyColors.map((c,i)=>(
+            <button key={c} onClick={()=>setColorIdx(i)} style={{width:24,height:24,borderRadius:"50%",border:colorIdx===i?"3px solid #5a3820":"2px solid #ddd",background:c,cursor:"pointer",transition:"all 0.15s",transform:colorIdx===i?"scale(1.25)":"scale(1)"}}/>
+          ))}
+        </div>
+        <div className="flex gap-2" style={{alignItems:"center"}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>fileRef.current?.click()}>📎 add photo</button>
+          {imgSrc&&<span style={{fontSize:12,color:"var(--soft)"}}>photo ready ✓</span>}
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={onFile}/>
+        </div>
+        <button className="btn btn-primary btn-sm" style={{alignSelf:"flex-end"}} onClick={add}>✦ pin idea</button>
+      </div>
+      {ideas.length===0
+        ?<div className="empty"><div className="empty-icon">💡</div><div className="empty-text">pin your first wild idea!</div></div>
+        :<div className="sticky-grid">
+            {ideas.map((idea,i)=>(
+              <div key={idea.id} className="sticky" style={{background:stickyColors[idea.colorIdx],"--rot":`${rot(i)}deg`,"--pin-color":pinColors[idea.colorIdx]}}>
+                <div className="sticky-pin"/>
+                {idea.imgSrc&&<img src={idea.imgSrc} alt={idea.title} style={{width:"100%",height:90,objectFit:"cover",borderRadius:8,marginBottom:8}}/>}
+                <div className="sticky-title">{idea.title}</div>
+                {idea.body&&<div className="sticky-body">{idea.body}</div>}
+                <div className="sticky-actions">
+                  <button className="btn-icon" onClick={()=>openEdit(idea)} style={{fontSize:12}}>✏️</button>
+                  <button className="btn-icon" onClick={()=>remove(idea.id)} style={{fontSize:12,color:"#904030"}}>🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
+      }
+      {editing&&<EditModal fields={[{key:"title",label:"title"},{key:"body",label:"idea",type:"textarea"}]} values={editVals} onChange={(k,v)=>setEditVals({...editVals,[k]:v})} onSave={saveEdit} onClose={()=>setEditing(null)}/>}
+    </div>
+  );
+}
+
+function WishlistSection({user,toast}){
+  const [wishes,setWishes]=useState(()=>load(user,"wishlist",[]));
+  const [title,setTitle]=useState("");
+  const [note,setNote]=useState("");
+  const [colorIdx,setColorIdx]=useState(0);
+  const [emoji,setEmoji]=useState("🌸");
+  const [birthday,setBirthday]=useState(()=>load(user,"birthday",""));
+  const [editing,setEditing]=useState(null);
+  const [editVals,setEditVals]=useState({});
+  const [showBdaySet,setShowBdaySet]=useState(false);
+  const [imgSrc,setImgSrc]=useState(null);
+  const fileRef=useRef();
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setImgSrc(ev.target.result);r.readAsDataURL(f);};
+  useEffect(()=>{save(user,"wishlist",wishes);},[wishes,user]);
+  useEffect(()=>{save(user,"birthday",birthday);},[birthday,user]);
+
+  const daysUntilBirthday=useMemo(()=>{
+    if(!birthday)return null;
+    const now=new Date();
+    const bd=new Date(birthday);
+    const next=new Date(now.getFullYear(),bd.getMonth(),bd.getDate());
+    if(next<=now)next.setFullYear(now.getFullYear()+1);
+    return Math.ceil((next-now)/(1000*60*60*24));
+  },[birthday]);
+
+  const add=()=>{
+    if(!title)return;
+    setWishes([{id:uid(),title,note,colorIdx,emoji,done:false,date:today(),imgSrc},...wishes]);
+    setTitle("");setNote("");setEmoji(wishEmojis[Math.floor(Math.random()*wishEmojis.length)]);setImgSrc(null);if(fileRef.current)fileRef.current.value="";
+    toast("wish added 🌸");
+  };
+  const toggleDone=id=>{setWishes(wishes.map(w=>w.id===id?{...w,done:!w.done}:w));};
+  const remove=id=>{setWishes(wishes.filter(w=>w.id!==id));toast("removed 🌿");};
+  const openEdit=w=>{setEditing(w.id);setEditVals({title:w.title,note:w.note||"",emoji:w.emoji});};
+  const saveEdit=()=>{setWishes(wishes.map(w=>w.id===editing?{...w,...editVals}:w));setEditing(null);toast("updated ✦");};
+
+  const done=wishes.filter(w=>w.done).length;
+  const total=wishes.length;
+
+  return(
+    <div style={{minHeight:"100vh",position:"relative"}}>
+      <div style={{position:"relative",zIndex:10}}>
+        <div className="scratch-header">
+          <div className="tape" style={{marginBottom:12,display:"inline-block"}}>✦ before my next birthday ✦</div>
+          <div style={{height:10}}/>
+          <div className="scratch-title">Wish List 🎀</div>
+          <div className="scratch-subtitle">a scrapbook of all the things I want to do, feel & become</div>
+          {birthday&&daysUntilBirthday!==null&&(
+            <div className="wish-countdown">🎂 {daysUntilBirthday} days until the next chapter begins</div>
+          )}
+          {!birthday&&(
+            <div style={{marginTop:14}}>
+              {showBdaySet?(
+                <div style={{display:"inline-flex",gap:8,alignItems:"center",background:"rgba(255,248,239,0.8)",padding:"8px 16px",borderRadius:4,border:"1px solid rgba(180,130,80,0.3)"}}>
+                  <label style={{fontFamily:"'Caveat',cursive",fontSize:16}}>🎂 birthday:</label>
+                  <input type="date" className="input" style={{width:"auto",padding:"4px 10px"}} onChange={e=>setBirthday(e.target.value)}/>
+                  <button className="btn btn-primary btn-sm" onClick={()=>setShowBdaySet(false)}>set it!</button>
+                </div>
+              ):(
+                <button className="btn btn-ghost btn-sm" style={{fontFamily:"'Caveat',cursive",fontSize:15}} onClick={()=>setShowBdaySet(true)}>🎂 set birthday for countdown</button>
+              )}
+            </div>
+          )}
+        </div>
+        {total>0&&(
+          <div className="wish-stats">
+            <div className="wish-stat"><span className="wish-stat-num">{total}</span><span className="wish-stat-label">wishes made</span></div>
+            <div className="wish-stat"><span className="wish-stat-num">{done}</span><span className="wish-stat-label">wishes granted ✨</span></div>
+            <div className="wish-stat"><span className="wish-stat-num">{total-done}</span><span className="wish-stat-label">still dreaming</span></div>
+          </div>
+        )}
+        <div className="wish-form-area">
+          <div style={{background:"rgba(255,248,235,0.75)",border:"1px dashed rgba(180,130,80,0.4)",borderRadius:4,padding:"22px 24px 20px",marginBottom:28,position:"relative",backdropFilter:"blur(6px)"}}>
+            <div style={{position:"absolute",top:-8,left:"50%",transform:"translateX(-50%) rotate(-1deg)",width:64,height:14,background:"rgba(220,200,160,0.6)",borderRadius:2}}/>
+            <div style={{fontFamily:"'Caveat',cursive",fontSize:22,color:"var(--dark-brown)",marginBottom:14,marginTop:4}}>+ add a wish ✨</div>
+            <div className="wish-input-row">
+              <input className="wish-input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="I wish to..." onKeyDown={e=>e.key==="Enter"&&add()}/>
+            </div>
+            <input className="wish-input" style={{width:"100%",marginBottom:14,fontSize:15}} value={note} onChange={e=>setNote(e.target.value)} placeholder="tell me more about this wish..." onKeyDown={e=>e.key==="Enter"&&add()}/>
+            <div style={{display:"flex",gap:16,flexWrap:"wrap",marginBottom:16,alignItems:"flex-start"}}>
+              <div>
+                <div style={{fontFamily:"'Caveat',cursive",fontSize:14,color:"var(--soft)",marginBottom:6}}>pick a spirit:</div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",maxWidth:260}}>
+                  {wishEmojis.map(e=>(
+                    <button key={e} onClick={()=>setEmoji(e)} style={{fontSize:18,border:"none",cursor:"pointer",background:emoji===e?"rgba(200,160,80,0.25)":"transparent",borderRadius:4,padding:"2px 4px",transition:"all 0.15s",transform:emoji===e?"scale(1.25)":"scale(1)"}}>{e}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{fontFamily:"'Caveat',cursive",fontSize:14,color:"var(--soft)",marginBottom:6}}>card color:</div>
+                <div className="wish-color-picker">
+                  {wishColors.map((c,i)=>(
+                    <div key={i} className={`wish-color-swatch${colorIdx===i?" active":""}`} style={{background:c.bg}} onClick={()=>setColorIdx(i)} title={c.label}/>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2" style={{alignItems:"center",marginBottom:16}}>
+              <button className="btn btn-ghost btn-sm" onClick={()=>fileRef.current?.click()}>📎 add photo</button>
+              {imgSrc&&<span style={{fontSize:12,color:"var(--soft)"}}>photo ready ✓</span>}
+              <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={onFile}/>
+            </div>
+            <button className="btn btn-primary" style={{width:"100%",fontFamily:"'Satisfy',cursive",fontSize:16,letterSpacing:1}} onClick={add}>✦ add this wish to the book</button>
+          </div>
+        </div>
+        {wishes.length===0
+          ?<div className="empty" style={{position:"relative",zIndex:10}}>
+              <div className="empty-icon">🌸</div>
+              <div className="empty-text">your wishbook is empty — start dreaming!</div>
+            </div>
+          :<div className="wish-grid">
+              {wishes.map((w,i)=>(
+                <div key={w.id} className="wish-card" style={{background:wishColors[w.colorIdx]?.bg||"#fce4d8","--rot":`${rot(i)}deg`,opacity:w.done?0.82:1}}>
+                  <div className="wish-card-tape"/>
+                  {w.imgSrc&&<img src={w.imgSrc} alt={w.title} style={{width:"100%",height:90,objectFit:"cover",borderRadius:10,marginBottom:8}}/>}
+                  <span className="wish-card-emoji">{w.emoji}</span>
+                  <div className="wish-card-title" style={{textDecoration:w.done?"line-through":"none"}}>{w.title}</div>
+                  {w.note&&<div className="wish-card-note">{w.note}</div>}
+                  {w.done&&<div className="wish-card-done-stamp">DONE!</div>}
+                  <div className="wish-card-date">added {w.date}</div>
+                  <div className="wish-actions">
+                    <button className="btn-icon" style={{fontSize:12,background:"rgba(255,255,255,0.7)"}} onClick={()=>openEdit(w)}>✏️</button>
+                    <button className="btn btn-primary btn-sm" style={{fontSize:12,padding:"4px 10px"}} onClick={()=>toggleDone(w.id)}>
+                      {w.done?"↩ undo":"✓ granted!"}
+                    </button>
+                    <button className="btn-icon" style={{fontSize:12,background:"rgba(255,255,255,0.7)",color:"#904030"}} onClick={()=>remove(w.id)}>🗑</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+        }
+        {editing&&<EditModal fields={[{key:"title",label:"wish"},{key:"note",label:"details",type:"textarea"},{key:"emoji",label:"spirit emoji",type:"text"}]} values={editVals} onChange={(k,v)=>setEditVals({...editVals,[k]:v})} onSave={saveEdit} onClose={()=>setEditing(null)}/>}
+      </div>
+    </div>
+  );
+}
+
+class AmbientMusic{
+  constructor(){this.ctx=null;this.masterGain=null;this.playing=false;this.timers=[];this.nodes=[];}
+  _init(){
+    if(this.ctx)return;
+    this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    this.masterGain=this.ctx.createGain();
+    this.masterGain.gain.setValueAtTime(0,this.ctx.currentTime);
+    const conv=this.ctx.createConvolver();
+    const len=this.ctx.sampleRate*4;
+    const buf=this.ctx.createBuffer(2,len,this.ctx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}
+    conv.buffer=buf;
+    const wet=this.ctx.createGain();wet.gain.value=0.5;
+    const dry=this.ctx.createGain();dry.gain.value=0.6;
+    this.masterGain.connect(dry);dry.connect(this.ctx.destination);
+    this.masterGain.connect(conv);conv.connect(wet);wet.connect(this.ctx.destination);
+    this.nodes.push(conv,wet,dry);
+  }
+  _chord(time,freqs,dur,vol=0.055){
+    freqs.forEach((f,i)=>{
+      const osc=this.ctx.createOscillator();const g=this.ctx.createGain();
+      osc.type='sine';osc.frequency.value=f;
+      g.gain.setValueAtTime(0,time);
+      g.gain.linearRampToValueAtTime(vol*(1-i*0.07),time+1.4);
+      g.gain.setValueAtTime(vol*(1-i*0.07),time+dur-1.5);
+      g.gain.linearRampToValueAtTime(0,time+dur);
+      osc.connect(g);g.connect(this.masterGain);osc.start(time);osc.stop(time+dur);
+      this.nodes.push(osc,g);
+    });
+  }
+  _chime(time,freq,vol=0.075){
+    const osc=this.ctx.createOscillator();const osc2=this.ctx.createOscillator();const g=this.ctx.createGain();
+    osc.type='sine';osc.frequency.value=freq;
+    osc2.type='sine';osc2.frequency.value=freq*2.756;
+    const g2=this.ctx.createGain();g2.gain.value=0.28;
+    g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(vol,time+0.01);g.gain.exponentialRampToValueAtTime(0.001,time+3.2);
+    osc.connect(g);osc2.connect(g2);g2.connect(g);g.connect(this.masterGain);
+    osc.start(time);osc.stop(time+3.5);osc2.start(time);osc2.stop(time+3.5);
+    this.nodes.push(osc,osc2,g,g2);
+  }
+  _breath(time,freq,dur){
+    const buf=this.ctx.createBuffer(1,this.ctx.sampleRate*dur,this.ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    const src=this.ctx.createBufferSource();src.buffer=buf;
+    const filt=this.ctx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=10;
+    const g=this.ctx.createGain();
+    g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(0.016,time+dur*0.3);g.gain.linearRampToValueAtTime(0,time+dur);
+    src.connect(filt);filt.connect(g);g.connect(this.masterGain);src.start(time);src.stop(time+dur);
+    this.nodes.push(src,filt,g);
+  }
+  _schedule(){
+    if(!this.playing)return;
+    const t=this.ctx.currentTime;
+    const progs=[
+      [261.63,329.63,392.00,523.25],[293.66,369.99,440.00,587.33],
+      [392.00,493.88,587.33,783.99],[349.23,440.00,523.25,698.46],[329.63,415.30,493.88,659.25],
+    ];
+    const prog=progs[Math.floor(Math.random()*progs.length)];
+    this._chord(t,prog,15,0.05);
+    const chimes=[523.25,587.33,659.25,783.99,880.00,1046.5,698.46,784.00];
+    const n=3+Math.floor(Math.random()*5);
+    for(let i=0;i<n;i++){const delay=1+Math.random()*12;const note=chimes[Math.floor(Math.random()*chimes.length)];this._chime(t+delay,note,0.05+Math.random()*0.04);}
+    this._breath(t+0.5,261.63,11);this._breath(t+5,392.00,9);
+    this._chord(t,[65.41,82.41,98.00],15,0.025);
+    const timer=setTimeout(()=>this._schedule(),12000+Math.random()*3000);this.timers.push(timer);
+  }
+  start(vol=0.72){this._init();if(this.ctx.state==='suspended')this.ctx.resume();this.playing=true;this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);this.masterGain.gain.linearRampToValueAtTime(vol,this.ctx.currentTime+1.5);this._schedule();}
+  stop(){this.playing=false;this.timers.forEach(t=>clearTimeout(t));this.timers=[];if(this.masterGain){this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);this.masterGain.gain.linearRampToValueAtTime(0,this.ctx.currentTime+1.8);}}
+  setVolume(v){if(this.masterGain&&this.playing){this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);this.masterGain.gain.linearRampToValueAtTime(v,this.ctx.currentTime+0.3);}}
+}
+const ambientMusic=new AmbientMusic();
+
+function MusicPlayer({isDark}){
+  const [playing,setPlaying]=useState(false);
+  const [volume,setVolume]=useState(0.72);
+  const [notes]=useState(["🎵","🎶","🎼","✨","🌸"]);
+  const [noteIdx,setNoteIdx]=useState(0);
+  const audioRef=useRef(null);
+  useEffect(()=>{if(!playing)return;const t=setInterval(()=>setNoteIdx(i=>(i+1)%notes.length),900);return()=>clearInterval(t);},[playing]);
+  useEffect(()=>{if(audioRef.current)audioRef.current.volume=volume;},[volume]);
+  const toggle=()=>{
+    const a=audioRef.current;if(!a)return;
+    if(playing){a.pause();setPlaying(false);}
+    else{a.volume=volume;a.play().then(()=>setPlaying(true)).catch(err=>{console.error("Music failed to play:",err);alert("Couldn't play the music: "+err.message+"\n\nMake sure la_vie_en_rose.mp3 is in the same folder as this HTML file.");});}
+  };
+  const onVol=e=>{const v=parseFloat(e.target.value);setVolume(v);};
+  return(
+    <div className={`music-player${isDark?" dark":""}`}>
+      <audio ref={audioRef} src="la_vie_en_rose.mp3" loop preload="none"/>
+      <button className="music-play-btn" onClick={toggle} title={playing?"pause music":"play La Vie En Rose"}>
+        {playing?"⏸":"▶"}
+      </button>
+      <div>
+        <div className="music-label">
+          {playing?<span><span className="music-note">{notes[noteIdx]}</span> La Vie En Rose</span>:"La Vie En Rose 🎹"}
+        </div>
+        {playing&&<input type="range" className="music-vol" min="0" max="1" step="0.05" value={volume} onChange={onVol}/>}
+      </div>
+    </div>
+  );
+}
+
+const TABS=[
+  {id:"journal",label:"📷 Journal"},
+  {id:"places", label:"🗺️ Places"},
+  {id:"movies", label:"🎬 Movies"},
+  {id:"books",  label:"📚 Books"},
+  {id:"ideas",  label:"💡 Ideas"},
+  {id:"wishlist",label:"🌸 Wish List"},
+];
+const GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // unused now, kept for reference
+
+function App(){
+  const [tab,setTab]=useState("journal");
+  const [user,setUser]=useState(()=>{try{return JSON.parse(localStorage.getItem("wj_user")||"null");}catch{return null;}});
+  const [toastMsg,setToastMsg]=useState("");
+  const toastTimer=useRef(null);
+  const showToast=useCallback(msg=>{setToastMsg(msg);clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToastMsg(""),2400);},[]);
+  useEffect(()=>{
+    const setupAuthListener=()=>{
+      if(!window.fbOnAuthChanged)return;
+      window.fbOnAuthChanged((fbUser)=>{
+        if(fbUser){
+          setUser(fbUser);
+          localStorage.setItem("wj_user",JSON.stringify(fbUser));
+        }else{
+          setUser(null);
+          localStorage.removeItem("wj_user");
+        }
+      });
+    };
+    if(window.fbReady){setupAuthListener();}
+    else{window.addEventListener("firebase-ready",setupAuthListener,{once:true});}
+  },[]);
+  const signIn=()=>{
+    if(!window.fbSignIn){showToast("sign-in not ready yet, try again in a sec 🌿");return;}
+    window.fbSignIn()
+      .then(u=>{setUser(u);localStorage.setItem("wj_user",JSON.stringify(u));showToast("welcome, "+(u.name?u.name.split(" ")[0]:"friend")+" 🌸");})
+      .catch(err=>{console.error("Firebase sign-in failed:",err);showToast("sign-in failed 😕");});
+  };
+  const signOut=()=>{
+    if(window.fbSignOut){window.fbSignOut().catch(()=>{});}
+    setUser(null);localStorage.removeItem("wj_user");showToast("signed out 🌿");
+  };
+  const BG=BACKGROUNDS[tab]||BACKGROUNDS.journal;
+  const isMovies=tab==="movies";
+  const userId=user?.email||"guest";
+  return(
+    <div style={{minHeight:"100vh",position:"relative",color:isMovies?"#f0e8d0":"inherit"}}>
+      <BG/>
+      {!user&&(
+        <div className="signin-banner">
+          <span>✦ sign in to save & sync your whimsical world across devices ✦</span>
+          <button className="google-btn" onClick={signIn}>
+            <svg className="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            sign in with Google
+          </button>
+        </div>
+      )}
+      <nav className="nav">
+        <div className="nav-title">✦ Whimsy Journals ✦</div>
+        {TABS.map(t=>(
+          <button key={t.id} className={`nav-btn ${tab===t.id?"active":""}`} onClick={()=>setTab(t.id)}
+            style={isMovies&&tab!==t.id?{color:"rgba(240,228,200,0.65)"}:{}}>
+            {t.label}
+          </button>
+        ))}
+        <div className="nav-right">
+          {user
+            ?<div className="user-chip">
+                {user.picture?<img className="user-avatar" src={user.picture} alt={user.name}/>:<span style={{fontSize:16}}>🌸</span>}
+                {user.name.split(" ")[0]}
+                <button onClick={signOut} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:"var(--soft)",marginLeft:2}}>✕</button>
+              </div>
+            :<button className="google-btn btn-sm" style={{fontSize:13,padding:"5px 12px"}} onClick={signIn}>
+                <svg className="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                sign in
+              </button>
+          }
+        </div>
+      </nav>
+
+      {tab==="journal"&&(
+        <div className="hero">
+          <SparkleTitle/>
+          <div className="hero-divider"/>
+          <div className="hero-sub">✦ a soulful space for art, wonder & all the soft things ✦</div>
+        </div>
+      )}
+      {tab!=="journal"&&tab!=="wishlist"&&(
+        <div style={{textAlign:"center",padding:"36px 24px 20px",position:"relative",zIndex:10}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",fontSize:"clamp(28px,5vw,52px)",color:isMovies?"#d8a8e8":"var(--dark-brown)",letterSpacing:2,textShadow:isMovies?"0 2px 20px rgba(160,100,200,0.4)":"none"}}>
+            {TABS.find(t=>t.id===tab)?.label}
+          </div>
+          <div style={{width:100,height:1,background:isMovies?"linear-gradient(90deg,transparent,#b888d8,transparent)":"linear-gradient(90deg,transparent,var(--antique-gold),transparent)",margin:"12px auto 0"}}/>
+        </div>
+      )}
+
+      {tab==="journal"   &&<JournalSection user={userId} toast={showToast}/>}
+      {tab==="places"    &&<PlacesSection  user={userId} toast={showToast}/>}
+      {tab==="movies"    &&<ListSection icon="🎬" title="Movies" noun="Movie" accentColor="#b87060" storeKey="movies" user={userId} toast={showToast}/>}
+      {tab==="books"     &&<ListSection icon="📚" title="Books"  noun="Book"  accentColor="#7a9c78" storeKey="books"  user={userId} toast={showToast}/>}
+      {tab==="ideas"     &&<IdeasSection  user={userId} toast={showToast}/>}
+      {tab==="wishlist"  &&<WishlistSection user={userId} toast={showToast}/>}
+
+      <Toast msg={toastMsg}/>
+      <MusicPlayer isDark={isMovies}/>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
